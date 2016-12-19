@@ -59,6 +59,8 @@ public class CallLogReport {
 	}
 
 	public void saveReport(String folder, String filename) throws IOException {
+		if(callLogList==null || callLogList.isEmpty()) { return; }
+		
 		Files.createDirectories(Paths.get(folder), new FileAttribute[0]);
 		
 		FileWriter writer = new FileWriter(folder + System.getProperty("file.separator")+filename);

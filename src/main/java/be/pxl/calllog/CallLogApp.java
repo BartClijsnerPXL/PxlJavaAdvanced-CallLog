@@ -47,12 +47,12 @@ public class CallLogApp {
 		Map<String, List<CallLog>> archiveMap = CallLogUtil.createMapByDate(archive);
 		
 		for (String callLogKey : archiveMap.keySet()) {
+			String archiveLocation = archiveFolder + System.getProperty("file.separator") + callLogKey.replaceAll("_", System.getProperty("file.separator")); 
 			try {
-				String archiveFolder = outputFolder + System.getProperty("file.separator") + callLogKey.replaceAll("_", System.getProperty("file.separator")); 
-				System.out.println("Saving archive "+archiveFolder+"/"+archiveFilename);
-				new CallLogReport(archiveMap.get(callLogKey)).saveReport(archiveFolder, archiveFilename);
+				System.out.println("Saving archive "+archiveLocation+"/"+archiveFilename);
+				new CallLogReport(archiveMap.get(callLogKey)).saveReport(archiveLocation, archiveFilename);
 			} catch (IOException e) {
-				System.err.println("Exception saving archive "+archiveFolder+"/"+archiveFilename);
+				System.err.println("Exception saving archive "+archiveLocation+"/"+archiveFilename);
 				e.printStackTrace();
 			}
 		}
@@ -64,7 +64,7 @@ public class CallLogApp {
 	 */
 	private void saveReport(CallLogReport callLogReport, String reportName) {
 		try {
-			callLogReport.saveReport(outputFolder, reportName + ".csv");
+			callLogReport.saveReport(outputFolder, reportName);
 		} catch (IOException e) {
 			System.err.println("Exception saving report: "+reportName);
 			e.printStackTrace();
