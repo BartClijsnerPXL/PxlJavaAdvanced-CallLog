@@ -4,10 +4,11 @@ package be.pxl.calllog;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -20,10 +21,15 @@ public class CallLogApp {
 	Date archiveUntilDate;
 	
 	public CallLogApp() {
+		
+		long start = System.currentTimeMillis();
 
 		init();
 		
-		Collection<CallLog> callLogList = createCallLogCollection();
+		Collection<CallLog> callLogList = createCallLogCollectionMultiThreaded();
+//		Collection<CallLog> callLogList = createCallLogCollection();
+		
+		System.out.println("CallLogs: "+callLogList.size());
 		
 		CallLogReport callLogReport = new CallLogReport(callLogList);
 		
@@ -34,6 +40,33 @@ public class CallLogApp {
 		
 		createArchive(callLogReport);
 		
+		long end = System.currentTimeMillis() - start;
+		System.out.printf("Application ended in %f seconds",(float)end/1000);
+	}
+
+	private Collection<CallLog> createCallLogCollectionMultiThreaded() {
+		List<CallLog> callLogList = Collections.synchronizedList(new ArrayList<>());
+		Path csvFolder = Paths.get(inputFolder);
+		File[] csvFiles = csvFolder.toFile().listFiles((dir, name) -> name.endsWith(".csv"));
+		List<Thread> activeThreads = new ArrayList<>();
+		for (File csvFile : csvFiles) {
+			CallLogCollectorThread callLogThread = new CallLogCollectorThread(callLogList, csvFile);
+			callLogThread.setName("Thread-"+csvFile.getName());
+			callLogThread.start();
+			activeThreads.add(callLogThread);
+		}
+		
+		// Wait for threads to finish
+		for(Thread activeThread : activeThreads) {
+			try {
+				activeThread.join();
+			} catch (InterruptedException e) {
+				System.out.println("Interruption of thread " + Thread.currentThread().getName());
+				e.printStackTrace();
+			}
+		}
+		
+		return callLogList;
 	}
 
 	/**
@@ -49,8 +82,8 @@ public class CallLogApp {
 		for (String callLogKey : archiveMap.keySet()) {
 			String archiveLocation = archiveFolder + System.getProperty("file.separator") + callLogKey.replaceAll("_", System.getProperty("file.separator")); 
 			try {
-				System.out.println("Saving archive "+archiveLocation+"/"+archiveFilename);
-				new CallLogReport(archiveMap.get(callLogKey)).saveReport(archiveLocation, archiveFilename);
+//				System.out.println("Saving archive "+archiveLocation+"/"+archiveFilename);
+				new CallLogReport(archiveMap.get(callLogKey)).saveReportMultiThreaded(archiveLocation, archiveFilename);
 			} catch (IOException e) {
 				System.err.println("Exception saving archive "+archiveLocation+"/"+archiveFilename);
 				e.printStackTrace();
@@ -64,7 +97,7 @@ public class CallLogApp {
 	 */
 	private void saveReport(CallLogReport callLogReport, String reportName) {
 		try {
-			callLogReport.saveReport(outputFolder, reportName);
+			callLogReport.saveReportMultiThreaded(outputFolder, reportName);
 		} catch (IOException e) {
 			System.err.println("Exception saving report: "+reportName);
 			e.printStackTrace();

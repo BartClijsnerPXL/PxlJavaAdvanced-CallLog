@@ -71,4 +71,10 @@ public class CallLogReport {
 		writer.close();
 	}
 
+	public void saveReportMultiThreaded(String folder, String filename) throws IOException {
+		CallLogWriterThread writerThread = new CallLogWriterThread(callLogList, folder, filename);
+		writerThread.setName("Thread-"+folder);
+		writerThread.start();
+	}
+
 }

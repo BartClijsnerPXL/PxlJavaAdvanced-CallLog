@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class CallLogFactory {
 	
-	public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+	public static final String DATEFORMAT_PATTERN = "dd/MM/yyyy HH:mm:ss";
 	
 	private static final String DEFAULT_CALLLOG_ITEM_SEPARATOR = ";";
 	
@@ -34,7 +34,7 @@ public class CallLogFactory {
 		callLog.setNaam(callLogArray[1]);
 		
 		try {
-			callLog.setDatum(DATEFORMAT.parse(callLogArray[2] + " " + callLogArray[3]));
+			callLog.setDatum(new SimpleDateFormat(DATEFORMAT_PATTERN).parse(callLogArray[2] + " " + callLogArray[3]));
 		} catch (ParseException e) {
 			System.err.println("Error parsing date for callog " + callLog.getId());
 		}
@@ -81,7 +81,7 @@ public class CallLogFactory {
 		callLogBuffer.append(callLog.getPrio());				// 6
 		callLogBuffer.append(itemSeparator);
 		callLogBuffer.append(callLog.getStatus().getValue());	// 7
-		callLogBuffer.append(itemSeparator);
+		callLogBuffer.append(System.lineSeparator());
 		
 		return callLogBuffer.toString();
 		
@@ -89,7 +89,7 @@ public class CallLogFactory {
 
 	private static String getDate(Date datum) {
 		try {
-			return DATEFORMAT.format(datum).split(" ")[0];
+			return new SimpleDateFormat(DATEFORMAT_PATTERN).format(datum).split(" ")[0];
 		} catch (Exception e) {
 			System.err.println("Error formatting date "+e.getMessage());
 			return "";
@@ -98,7 +98,7 @@ public class CallLogFactory {
 	
 	private static String getTime(Date datum) {
 		try {
-			return DATEFORMAT.format(datum).split(" ")[1];
+			return new SimpleDateFormat(DATEFORMAT_PATTERN).format(datum).split(" ")[1];
 		} catch (Exception e) {
 			System.err.println("Error formatting time "+e.getMessage());
 			return "";

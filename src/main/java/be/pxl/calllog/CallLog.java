@@ -1,5 +1,6 @@
 package be.pxl.calllog;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -56,7 +57,7 @@ public class CallLog implements Comparable<CallLog> {
 	 * @return String
 	 */
 	public String getDatumFormatted() {
-		return CallLogFactory.DATEFORMAT.format(datum);
+		return new SimpleDateFormat(CallLogFactory.DATEFORMAT_PATTERN).format(datum);
 	}
 	
 	/**
