@@ -37,7 +37,7 @@ public class CallLogTest {
 
 	@Test
 	public void test_calllog_datum () {
-		assertEquals(CallLogFactory.DATEFORMAT.format(calllog.getDatum()),"21/08/2014 04:21:14");
+		assertEquals(new SimpleDateFormat(CallLogFactory.DATEFORMAT_PATTERN).format(calllog.getDatum()),"21/08/2014 04:21:14");
 	}
 
 	@Test
