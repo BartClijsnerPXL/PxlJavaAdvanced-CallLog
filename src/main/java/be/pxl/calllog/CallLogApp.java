@@ -3,6 +3,7 @@ package be.pxl.calllog;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +49,9 @@ public class CallLogApp {
 		List<CallLog> callLogList = Collections.synchronizedList(new ArrayList<>());
 		Path csvFolder = Paths.get(inputFolder);
 		File[] csvFiles = csvFolder.toFile().listFiles((dir, name) -> name.endsWith(".csv"));
+
 		List<Thread> activeThreads = new ArrayList<>();
+		
 		for (File csvFile : csvFiles) {
 			CallLogCollectorThread callLogThread = new CallLogCollectorThread(callLogList, csvFile);
 			callLogThread.setName("Thread-"+csvFile.getName());
@@ -80,7 +83,8 @@ public class CallLogApp {
 		Map<String, List<CallLog>> archiveMap = CallLogUtil.createMapByDate(archive);
 		
 		for (String callLogKey : archiveMap.keySet()) {
-			String archiveLocation = archiveFolder + System.getProperty("file.separator") + callLogKey.replaceAll("_", System.getProperty("file.separator")); 
+			
+			String archiveLocation = archiveFolder + File.separator + callLogKey.replaceAll("_", Matcher.quoteReplacement(File.separator)); 
 			try {
 //				System.out.println("Saving archive "+archiveLocation+"/"+archiveFilename);
 				new CallLogReport(archiveMap.get(callLogKey)).saveReportMultiThreaded(archiveLocation, archiveFilename);
